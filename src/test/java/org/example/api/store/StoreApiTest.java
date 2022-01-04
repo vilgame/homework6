@@ -17,21 +17,28 @@ import static io.restassured.RestAssured.given;
 
 public class StoreApiTest {
 
+    private Order order;
+
+    public void setOrder() {
+        this.order = getOrder();
+    }
+
     public Order getOrder() {
         Order order = new Order();
-        int orderId = Integer.parseInt(System.getProperty("orderId"));
-        int petId = Integer.parseInt(System.getProperty("petId"));
+        int orderId = new Random().nextInt(10);
+        int petId = new Random().nextInt(10);
         order.setId(orderId);
         order.setPetId(petId);
         return order;
     }
 
+
     @BeforeClass
     public void prepare() throws IOException {
+        setOrder();
         System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
         RestAssured.requestSpecification = new RequestSpecBuilder()
                 .setBaseUri("https://petstore.swagger.io/v2/")
-                .addHeader("api_key", System.getProperty("api.key"))
                 .setAccept(ContentType.JSON)
                 .setContentType(ContentType.JSON)
                 .log(LogDetail.ALL)
@@ -40,42 +47,38 @@ public class StoreApiTest {
     }
 
     @Test
-    public void checkObjectSave() throws InterruptedException {
+    public void checkObjectSave() {
         given()
-                .body(getOrder())
+                .body(order)
                 .when()
                 .post("/store/order")
                 .then()
                 .statusCode(200);
-        Thread.sleep(10000);
         Order actual =
                 given()
-                        .pathParam("orderId", getOrder().getId())
+                        .pathParam("orderId", order.getId())
                         .when()
                         .get("/store/order/{orderId}")
                         .then()
                         .statusCode(200)
                         .extract().body()
                         .as(Order.class);
-        Assert.assertEquals(actual.getId(), getOrder().getId());
+        Assert.assertEquals(actual.getId(), order.getId());
     }
 
     @Test
-    public void testDelete() throws IOException, InterruptedException {
-        System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
+    public void testDelete() {
         given()
-                .pathParam("orderId", getOrder().getId())
+                .pathParam("orderId", order.getId())
                 .when()
                 .delete("/store/order/{orderId}")
                 .then()
                 .statusCode(200);
-        Thread.sleep(10000);
         given()
-                .pathParam("orderId", getOrder().getId())
+                .pathParam("orderId", order.getId())
                 .when()
                 .get("/store/order/{orderId}")
                 .then()
                 .statusCode(404);
     }
-
 }
