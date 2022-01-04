@@ -17,6 +17,15 @@ import static io.restassured.RestAssured.given;
 
 public class StoreApiTest {
 
+    public Order getOrder() {
+        Order order = new Order();
+        int orderId = Integer.parseInt(System.getProperty("orderId"));
+        int petId = Integer.parseInt(System.getProperty("petId"));
+        order.setId(orderId);
+        order.setPetId(petId);
+        return order;
+    }
+
     @BeforeClass
     public void prepare() throws IOException {
         System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
@@ -31,29 +40,42 @@ public class StoreApiTest {
     }
 
     @Test
-    public void checkObjectSave() {
-        Order order = new Order();
-        int orderId = new Random().nextInt(1000);
-        int petId = new Random().nextInt(1000);
-        order.setId(orderId);
-        order.setPetId(petId);
+    public void checkObjectSave() throws InterruptedException {
         given()
-                .body(order)
+                .body(getOrder())
                 .when()
                 .post("/store/order")
                 .then()
                 .statusCode(200);
-
+        Thread.sleep(10000);
         Order actual =
                 given()
-                        .pathParam("orderId", orderId)
+                        .pathParam("orderId", getOrder().getId())
                         .when()
                         .get("/store/order/{orderId}")
                         .then()
                         .statusCode(200)
                         .extract().body()
                         .as(Order.class);
-        Assert.assertEquals(actual.getId(), order.getId());
+        Assert.assertEquals(actual.getId(), getOrder().getId());
+    }
+
+    @Test
+    public void testDelete() throws IOException, InterruptedException {
+        System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
+        given()
+                .pathParam("orderId", getOrder().getId())
+                .when()
+                .delete("/store/order/{orderId}")
+                .then()
+                .statusCode(200);
+        Thread.sleep(10000);
+        given()
+                .pathParam("orderId", getOrder().getId())
+                .when()
+                .get("/store/order/{orderId}")
+                .then()
+                .statusCode(404);
     }
 
 }
