@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import org.example.model.Pet;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class PetApiTest {
      * Простейшая проверка: создаём объект, сохраняем на сервере и проверяем, что при запросе возвращается
      * "тот же" объект
      */
-    @Test
+    @Ignore
     public void checkObjectSave() {
         Pet pet = new Pet(); // создаём экземпляр POJO объекта Pet
         int id = new Random().nextInt(500000); // просто нужно создать произвольный айди
@@ -97,7 +98,7 @@ public class PetApiTest {
 
     }
 
-    @Test
+    @Ignore
     public void tetDelete() throws IOException {
         System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
         given()
