@@ -2,6 +2,7 @@ package org.example.api.pet;
 
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import static io.restassured.RestAssured.given;
 //В этом классе реализован пример отправки запроса GET без использования спецификации запроса new RequestSpecBuilder(),
 //то есть все необходимые параметры переданы одинм методом
 public class PetApiTestWithoutPrepare {
-    @Test
+    @Ignore
     public void testGet() throws IOException {
         // Читаем конфигурационный файл в System.properties
         System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));

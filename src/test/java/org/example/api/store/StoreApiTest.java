@@ -10,7 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 
 import static io.restassured.RestAssured.given;
@@ -25,18 +25,16 @@ public class StoreApiTest {
 
     public Order getOrder() {
         Order order = new Order();
-        int orderId = new Random().nextInt(10);
-        int petId = new Random().nextInt(10);
+        int orderId = new Random().nextInt(10) + 1;
+        int petId = new Random().nextInt(10) + 1;
         order.setId(orderId);
         order.setPetId(petId);
         return order;
     }
 
-
     @BeforeClass
-    public void prepare() throws IOException {
+    public void prepare() {
         setOrder();
-        System.getProperties().load(ClassLoader.getSystemResourceAsStream("my.properties"));
         RestAssured.requestSpecification = new RequestSpecBuilder()
                 .setBaseUri("https://petstore.swagger.io/v2/")
                 .setAccept(ContentType.JSON)
@@ -80,5 +78,18 @@ public class StoreApiTest {
                 .get("/store/order/{orderId}")
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    public void testStoreInventory() {
+        Map inventory = given()
+                .when()
+                .get("/store/inventory")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .as(Map.class);
+        Assert.assertTrue(inventory.containsKey("sold"), "Inventory не содержит статус sold" );
     }
 }
